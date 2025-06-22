@@ -1,5 +1,6 @@
 from mx import finalize_mx_specs, mx_mapping
 from mx.mx_ops import quantize_mx_op
+import torch
 import torch.nn as nn
 from transformers.models.llama.modeling_llama import LlamaRMSNorm
 from transformers.models.qwen2.modeling_qwen2 import Qwen2RMSNorm
@@ -30,8 +31,8 @@ class Mx:
         self.mx_specs = finalize_mx_specs(mx_specs)
         mx_mapping.inject_pyt_ops(self.mx_specs)
 
+    @torch.no_grad()
     def pseudo_quantize(self, model):
-        model = model.cpu()
         element_format = self.mx_specs["w_elem_format"]
         layers = model.model.layers
         for layer in layers:
