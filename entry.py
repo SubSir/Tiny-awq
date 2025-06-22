@@ -6,11 +6,11 @@ from datasets import load_dataset
 from torch import nn
 import tqdm
 
+from pseudo import Mx
+
 
 def load(model_path="/mnt/d/Studio/Python/models/DeepSeek-R1-Distill-Qwen-1.5B"):
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = AutoModelForCausalLM.from_pretrained(model_path)
-    model.to(device)
     enc = AutoTokenizer.from_pretrained(
         model_path, use_fast=False, trust_remote_code=True
     )
@@ -18,6 +18,8 @@ def load(model_path="/mnt/d/Studio/Python/models/DeepSeek-R1-Distill-Qwen-1.5B")
 
 
 def evaluate(model, enc):
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model.to(device)
     testenc = load_dataset("wikitext", "wikitext-2-raw-v1", split="test")
     testenc = enc("\n\n".join(testenc["text"]), return_tensors="pt")
     model.seqlen = 2048
@@ -48,5 +50,11 @@ def evaluate(model, enc):
 
 
 if __name__ == "__main__":
+    print(0)
+    # evaluate(model, enc)
+    mx = Mx()
     model, enc = load()
+    print(3)
+    model = mx.pseudo_quantize(model)
+    print(2)
     evaluate(model, enc)
